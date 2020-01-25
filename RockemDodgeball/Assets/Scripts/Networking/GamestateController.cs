@@ -8,11 +8,14 @@ public class GamestateController : MonoBehaviour
     // 3. Forward current local gamestate to NetworkBroker
     // 4. Receive global gamestate updates from NetworkBroker
 
-    public ClientUpdate queuedGamestate;
+    public string playerName;
+    public long playerId;
     public int framesPerSecond = 60;
     public GameObject player;
-    public OldNetworkedObject enemy;
+    public OldNetworkedObject enemyObject;
+    public OldNetworkedObject[] ballObjects;
 
+    private ClientGamestateUpdate queuedGamestate;
     private NetworkBroker networkBroker;
     private float updateTimer;
     private float updateFrequency;
@@ -21,6 +24,7 @@ public class GamestateController : MonoBehaviour
     {
         networkBroker = transform.GetComponent<NetworkBroker>();
         updateFrequency = (1f / framesPerSecond);
+        queuedGamestate = new ClientGamestateUpdate();
     }
 
     void FixedUpdate()
@@ -35,33 +39,44 @@ public class GamestateController : MonoBehaviour
 
     private void SendGamestate()
     {
+        queuedGamestate.player.name = playerName;
+        queuedGamestate.player.playerId = playerId;
         networkBroker.SendClientUpdateToServer(queuedGamestate);
     }
 
-    public void ReceiveGamestate(ServerUpdate gamestate)
+    public void ReceiveGamestate(ServerGamestateUpdate gamestate)
     {
-        // This is where most of the action happens
-        Vector3 newEnemyPos = new Vector3(gamestate.xPos, gamestate.yPos, gamestate.zPos);
-        Quaternion newEnemyRot = new Quaternion(gamestate.xRot, gamestate.yRot, gamestate.zRot, gamestate.wRot);
-        UpdateEnemyTransform(newEnemyPos, newEnemyRot);
+        // Update Enemy player
+        UpdateEnemy(gamestate.enemy);
+
+        // Update Balls
+        //foreach (BallData ball in gamestate.balls)
+        //{
+        //    UpdateBall(ball);
+        //}
     }
 
     // Outgoing Client -> Server Methods
     public void PlayerUpdate(Vector3 position, Quaternion rotation)
     {
-        queuedGamestate.xPos = position.x;
-        queuedGamestate.yPos = position.y;
-        queuedGamestate.zPos = position.z;
-
-        queuedGamestate.xRot = rotation.x;
-        queuedGamestate.yRot = rotation.y;
-        queuedGamestate.zRot = rotation.z;
-        queuedGamestate.wRot = rotation.w;
+        queuedGamestate.player.position = new Vector3Data(position);
+        queuedGamestate.player.rotation = new QuaternionData(rotation);
     }
 
     // Incoming Server -> Client Methods
-    private void UpdateEnemyTransform(Vector3 pos, Quaternion rot)
+    private void UpdateEnemy(PlayerData enemyInfo)
     {
-        enemy.SetTransform(pos, rot);
+        Vector3Data rawPos = enemyInfo.position;
+        Vector3 pos = new Vector3(rawPos.x, rawPos.y, rawPos.z);
+
+        QuaternionData rawRot = enemyInfo.rotation;
+        Quaternion rot = new Quaternion(rawRot.x, rawRot.y, rawRot.z, rawRot.w);
+
+        enemyObject.SetTransform(pos, rot);
+    }
+
+    private void UpdateBall(BallData ball)
+    {
+        //ballObjects[ball.ballId].SetTransform()
     }
 }

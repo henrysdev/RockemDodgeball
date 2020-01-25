@@ -74,7 +74,7 @@ public class UdpGameClient : MonoBehaviour
             {
                 // Blocks until a message returns on this socket from a remote host.
                 byte[] receiveBytes = udpClient.Receive(ref remoteIpEndPoint);
-                ServerUpdate update = TransportSerializer.DeserializeServerTick(receiveBytes);
+                ServerGamestateUpdate update = TransportSerializer.Deserialize<ServerGamestateUpdate>(receiveBytes);
                 networkBroker.ReceiveUpdateFromServer(update);
             }
             catch (Exception e)

@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using Newtonsoft.Json;
 using System.Text;
+using System.IO;
 
 public class TransportSerializer
 {
@@ -21,9 +22,10 @@ public class TransportSerializer
         return JsonConvert.SerializeObject(content);
     }
 
-    public static ServerUpdate DeserializeServerTick(byte[] content)
+    public static T Deserialize<T>(byte[] data) where T : class
     {
-        string stringContent = Encoding.ASCII.GetString(content);
-        return JsonConvert.DeserializeObject<ServerUpdate>(stringContent);
+        using (var stream = new MemoryStream(data))
+        using (var reader = new StreamReader(stream, Encoding.UTF8))
+            return JsonSerializer.Create().Deserialize(reader, typeof(T)) as T;
     }
 }

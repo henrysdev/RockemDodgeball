@@ -17,14 +17,14 @@ public class NetworkBroker : MonoBehaviour
         udpClient = transform.GetComponent<UdpGameClient>();
     }
 
-    public void SendClientUpdateToServer(ClientUpdate update)
+    public void SendClientUpdateToServer(ClientGamestateUpdate update)
     {
-        string message = TransportSerializer.Serialize<ClientUpdate>(ref update);
+        string message = TransportSerializer.Serialize(ref update);
         byte[] byteMessage = Encoding.UTF8.GetBytes(message);
         udpClient.SendPacket(byteMessage);
     }
 
-    public void ReceiveUpdateFromServer(ServerUpdate update)
+    public void ReceiveUpdateFromServer(ServerGamestateUpdate update)
     {
         gamestateController.ReceiveGamestate(update);
     }

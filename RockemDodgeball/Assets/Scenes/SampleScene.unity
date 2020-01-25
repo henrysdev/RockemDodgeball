@@ -927,9 +927,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 97f7e72b6222a43d9a2c82a39a793875, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  framesPerSecond: 3
+  playerName: Allahu
+  playerId: 0
+  framesPerSecond: 200
   player: {fileID: 258770660}
-  enemy: {fileID: 4606892182404176295}
+  enemyObject: {fileID: 4606892182404176295}
+  ballObjects: []
 --- !u!114 &1975600514
 MonoBehaviour:
   m_ObjectHideFlags: 0
