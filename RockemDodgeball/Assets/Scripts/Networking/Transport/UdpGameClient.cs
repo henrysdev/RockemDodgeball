@@ -13,7 +13,7 @@ public class UdpGameClient : MonoBehaviour
 
     public int clientListenPort = 8085;
     public int serverListenPort = 27189;
-    public string serverUri = "127.0.0.1";
+    public string serverUri = "34.207.92.109"; //"127.0.0.1";
 
     private NetworkBroker networkBroker;
     private UdpClient udpClient;
