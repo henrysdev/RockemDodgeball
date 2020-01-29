@@ -4,17 +4,22 @@ using UnityEngine;
 
 public class BallLauncher : MonoBehaviour
 {
-    public GameObject leftBallHolder;
-    public GameObject rightBallHolder;
+    public Queue<GameObject> ballQueue;
+    public int maxBalls;
     public Transform leftBallPos;
     public Transform rightBallPos;
     public GameObject projectile;
     public float launchVelocity;
+    public Transform launchTrans;
+
     private Animation anim;
+    private DodgeballPlayer player;
 
     // Start is called before the first frame update
     void Awake()
     {
+        player = transform.GetComponent<DodgeballPlayer>();
+        ballQueue = new Queue<GameObject>(maxBalls);
         anim = gameObject.GetComponent<Animation>();
     }
 
@@ -22,49 +27,28 @@ public class BallLauncher : MonoBehaviour
     void Update()
     {
         // TODO change to keycode reference for portability
-        if (Input.GetKeyDown(KeyCode.LeftShift)) HandleBallLaunch();
+        if (Input.GetKeyDown(KeyCode.LeftShift) && projectile != null) HandleBallLaunch();
     }
 
     void HandleBallLaunch()
     {
-        if (rightBallHolder) ThrowBall();
-        ReloadRightBall();
+        ThrowBall();
     }
 
     void ThrowBall()
     {
-        // Play throw animation
-        anim.Play();
-
-        // Launch projectile
-        float h = Input.GetAxisRaw("Horizontal");
-        float v = Input.GetAxisRaw("Vertical");
-
-        GameObject ball = Instantiate(projectile, rightBallHolder.transform);
-        Vector3 direction = (new Vector3(h, 0, v)).normalized;
-        Vector3 converted = Camera.main.transform.TransformDirection(direction) * launchVelocity * Time.deltaTime;
-        ball.GetComponent<Rigidbody>().velocity = new Vector3(converted.x, converted.y, converted.z);
-    }
-
-    void ReloadRightBall()
-    {
-        // TODO Adjust ball models
-        rightBallHolder = leftBallHolder;
-        leftBallHolder = null;
+        //GameObject ball = Instantiate(projectile, launchTrans.position, Quaternion.identity);
+        projectile.transform.position = launchTrans.position;
+        projectile.transform.rotation = Quaternion.identity;
+        projectile.GetComponent<Rigidbody>().velocity = Vector3.zero;
+        projectile.GetComponent<Dodgeball>().thrower = player;
+        projectile.GetComponent<Rigidbody>().AddForce(Camera.main.transform.forward * launchVelocity, ForceMode.Impulse);
+        //projectile = null;
     }
 
     void CollectBall(GameObject ball)
     {
-        if (!rightBallHolder)
-        {
-            rightBallHolder = ball;
-        }
-        else if (!leftBallHolder)
-        {
-            leftBallHolder = ball;
-        }
-
-        Destroy(ball);
+        ballQueue.Enqueue(ball);
     }
 
     private void OnTriggerEnter(Collider collider)

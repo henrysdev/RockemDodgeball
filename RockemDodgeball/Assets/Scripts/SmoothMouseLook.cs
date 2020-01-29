@@ -5,7 +5,8 @@ using System.Collections.Generic;
 [AddComponentMenu("Camera-Control/Smooth Mouse Look")]
 public class SmoothMouseLook : MonoBehaviour
 {
-
+	public Transform head;
+	public Transform thirdPersonCamera;
 	public enum RotationAxes { MouseXAndY = 0, MouseX = 1, MouseY = 2 }
 	public RotationAxes axes = RotationAxes.MouseXAndY;
 	public float sensitivityX = 15F;
@@ -29,6 +30,7 @@ public class SmoothMouseLook : MonoBehaviour
 	public float frameCounter = 20;
 
 	Quaternion originalRotation;
+	Quaternion thirdPersonCameraOriginalRotation;
 
 	void Update()
 	{
@@ -70,7 +72,9 @@ public class SmoothMouseLook : MonoBehaviour
 			Quaternion yQuaternion = Quaternion.AngleAxis(rotAverageY, Vector3.left);
 			Quaternion xQuaternion = Quaternion.AngleAxis(rotAverageX, Vector3.up);
 
-			transform.localRotation = originalRotation * xQuaternion * yQuaternion;
+			transform.localRotation = originalRotation * xQuaternion;
+            head.localRotation = thirdPersonCameraOriginalRotation * yQuaternion;
+			thirdPersonCamera.localRotation = thirdPersonCameraOriginalRotation * yQuaternion;
 		}
 		else if (axes == RotationAxes.MouseX)
 		{
@@ -126,7 +130,9 @@ public class SmoothMouseLook : MonoBehaviour
 		if (rb)
 			rb.freezeRotation = true;
 		originalRotation = transform.localRotation;
+		thirdPersonCameraOriginalRotation = thirdPersonCamera.localRotation;
 		Cursor.visible = false;
+		Cursor.lockState = CursorLockMode.Locked;
 	}
 
 	public static float ClampAngle(float angle, float min, float max)
